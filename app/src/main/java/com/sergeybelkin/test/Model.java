@@ -1,5 +1,7 @@
 package com.sergeybelkin.test;
 
+import android.util.Log;
+
 import com.sergeybelkin.test.pojo.Category;
 import com.sergeybelkin.test.pojo.CategoryList;
 import com.sergeybelkin.test.pojo.Product;
@@ -40,18 +42,18 @@ public class Model {
 
             @Override
             public void onFailure(Call<CategoryList> call, Throwable t) {
-
+                Log.i("log", "loadCategories failure \n" + t.getMessage());
             }
         });
     }
 
-    public void loadProducts(String keywords, final LoadProductsCallback callback){
+    public void loadProducts(String keywords, String category, final LoadProductsCallback callback){
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         Api api = retrofit.create(Api.class);
-        Call<ProductList> productListCall = api.getProducts(API_KEY, keywords);
+        Call<ProductList> productListCall = api.getProducts(API_KEY, keywords, category);
         productListCall.enqueue(new Callback<ProductList>() {
             @Override
             public void onResponse(Call<ProductList> call, Response<ProductList> response) {
@@ -61,7 +63,7 @@ public class Model {
 
             @Override
             public void onFailure(Call<ProductList> call, Throwable t) {
-
+                Log.i("log", "loadProducts failure \n" + t.getMessage());
             }
         });
     }

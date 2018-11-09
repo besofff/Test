@@ -4,25 +4,37 @@ import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.TextInputEditText;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.sergeybelkin.test.pojo.Category;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class SearchFragment extends Fragment implements View.OnClickListener {
+public class SearchFragment extends Fragment implements View.OnClickListener, Observable {
 
-    TextInputEditText mSearchTextInput;
+    private static final String ERROR_MESSAGE = "Поле ввода не должно быть пустым";
+    private static final String EMPTY_STRING = "";
+
+    TextInputLayout mTextInputLayout;
+    EditText mSearchEditText;
     Spinner mCategoriesSpin;
     ProgressDialog pd;
 
     private SearchPresenter mSearchPresenter;
+
+    List<Observer> mObservers = new ArrayList<>();
 
     public void showCategories(List<Category> categories){
         ArrayAdapter<Category> adapter = new ArrayAdapter<>(getContext(),
@@ -36,6 +48,7 @@ public class SearchFragment extends Fragment implements View.OnClickListener {
     private void showProgress(){
         pd = new ProgressDialog(getContext());
         pd.setMessage("Загрузка категорий");
+        pd.setCancelable(false);
         pd.show();
     }
 
@@ -63,7 +76,8 @@ public class SearchFragment extends Fragment implements View.OnClickListener {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_search, container, false);
 
-        mSearchTextInput = view.findViewById(R.id.searchTextInput);
+        mTextInputLayout = view.findViewById(R.id.textInputLayout);
+        mSearchEditText = view.findViewById(R.id.searchEditText);
         mCategoriesSpin = view.findViewById(R.id.categoriesSpin);
         view.findViewById(R.id.submitBtn).setOnClickListener(this);
         mSearchPresenter.viewIsReady();
@@ -73,14 +87,47 @@ public class SearchFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
-        String keywords = mSearchTextInput.getText().toString().replace(" ", ",");
-        String category = mCategoriesSpin.getSelectedItem().toString();
-        //добавить проверку корректности ввода
+        String keywords = mSearchEditText.getText().toString()
+                .replace(" ", ",");
+        String category = mCategoriesSpin.getSelectedItem().toString()
+                .toLowerCase().replace(" ", "_");
+
+        if (keywords.isEmpty()){
+            showError();
+            return;
+        } else {
+            hideError();
+        }
 
         switch (v.getId()){
             case R.id.submitBtn:
-                //todo передать
+                notifyObservers(keywords, category);
                 break;
         }
+    }
+
+    @Override
+    public void addObserver(Observer o) {
+        mObservers.add(o);
+    }
+
+    @Override
+    public void removeObserver(Observer o) {
+        mObservers.remove(o);
+    }
+
+    @Override
+    public void notifyObservers(String keywords, String category) {
+        for (Observer o : mObservers){
+            o.handleEvent(keywords, category);
+        }
+    }
+
+    private void showError(){
+        mTextInputLayout.setError(ERROR_MESSAGE);
+    }
+
+    private void hideError(){
+        mTextInputLayout.setError(EMPTY_STRING);
     }
 }

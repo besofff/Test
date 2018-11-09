@@ -14,21 +14,12 @@ public interface Api {
 
     @GET("listings/active?includes=Images:1:0")
     Call<ProductList> getProducts(@Query("api_key") String apiKey,
-                                  @Query("category") String category,
-                                  @Query("keywords") String keywords);
-
-    @GET("listings/active?includes=Images:1:0")
-    Call<ProductList> getProducts(@Query("api_key") String apiKey,
-                                  @Query("keywords") String keywords);
-
-    @GET("listings/active?includes=Images:1:0")
-    Call<ProductList> getProducts(@Query("api_key") String apiKey,
-                                  @Query("category") String category,
                                   @Query("keywords") String keywords,
-                                  @Query("page") int page);
+                                  @Query("category") String category);
 
     @GET("listings/active?includes=Images:1:0")
     Call<ProductList> getProducts(@Query("api_key") String apiKey,
                                   @Query("keywords") String keywords,
+                                  @Query("category") String category,
                                   @Query("page") int page);
 }

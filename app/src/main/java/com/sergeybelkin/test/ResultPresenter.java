@@ -23,16 +23,16 @@ public class ResultPresenter {
         mResultFragment = null;
     }
 
-    public void loadProducts(String keywords){
-        mModel.loadProducts(keywords, new Model.LoadProductsCallback(){
+    public void loadProducts(String keywords, String category){
+        mModel.loadProducts(keywords, category, new Model.LoadProductsCallback(){
             @Override
             public void onLoad(List<Product> products) {
-
+                mResultFragment.showProducts(products);
             }
         });
     }
 
-    public void requestSubmitted(String keywords){
-        loadProducts(keywords);
+    public void requestSubmitted(String keywords, String category){
+        loadProducts(keywords, category);
     }
 }
